@@ -5,7 +5,7 @@ notifikations through libnotify.
 Use ~/.mqtt2notify.yaml to configure the application
 """
 __author__ = 'Jonas Forsberg <barregargamel@gmail.com>'
-__licence__ = 'GPLv3 - https://www.gnu.org/licenses/gpl-3.0.html'
+__licence__ = 'Apache License v2'
 
 
 import os
