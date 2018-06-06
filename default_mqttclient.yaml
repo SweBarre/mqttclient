@@ -1,0 +1,39 @@
+mqtt:
+  host: localhost
+  port: 1883
+  use_tls: true
+  user: username
+  password: secret
+  timeout_reconnect: 60
+  logger: mqttclient
+  ca_file: /etc/ssl/ca-bundle.pem
+  subscriptions:
+    - name: irssi
+      subscribe: true
+      topic: irssi
+      plugins:
+        - irssi
+    - name: lights
+      subscribe: false
+      topic: test
+      plugins:
+        - notify
+      
+logging:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    default:
+      format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+  handlers:
+    stdout:
+      class: logging.StreamHandler
+      formatter: default
+      stream: ext://sys.stdout
+  loggers:
+    mqttclient:
+      handlers:
+        - stdout
+      level: WARNING
+      propagate: true
+  
