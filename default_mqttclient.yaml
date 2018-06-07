@@ -18,7 +18,16 @@ mqtt:
       topic: test
       plugins:
         - notify
-      
+publish:
+  test 1:
+    topic: test/testing
+    payload: hejsan svejsan
+    retain: false
+  test 2:
+    topic: test2/testing
+    payload: kalle kalas
+    retain: false
+
 logging:
   version: 1
   disable_existing_loggers: false

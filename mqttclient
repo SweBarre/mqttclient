@@ -119,13 +119,32 @@ class MQTTNotify():
         self.icon.connect('popup-menu', self.on_right_click)
         # Create right-click menu
         self.menu = gtk.Menu()
+        self.publish_item = gtk.MenuItem("Publish")
+        self.seperator_item = gtk.SeparatorMenuItem()
         self.quit_item = gtk.MenuItem("Quit")
+        self.menu.append(self.publish_item)
+        self.menu.append(self.seperator_item)
         self.menu.append(self.quit_item)
+        self._create_publish_menu()
         #add callbacks
         self.quit_item.connect_object("activate", self.quit, "Quit")
 
         #Show the menu items
+        self.publish_item.show()
+        self.seperator_item.show()
         self.quit_item.show()
+
+    def _create_publish_menu(self):
+        """ create the publish menu on the right click """
+        self.publish_menu = gtk.Menu()
+        for key in self.config['publish'].keys():
+            sub_menu = gtk.MenuItem(key)
+            self.publish_menu.append(sub_menu)
+            sub_menu.connect_object("activate", self.publish_item_response, key)
+            sub_menu.show()
+
+        self.publish_item.set_submenu(self.publish_menu)
+
 
     def _load_plugins(self):
         LOG.debug('Loading plugins..')
@@ -135,6 +154,13 @@ class MQTTNotify():
                 for plugin in plugin_list:
                     if plugin['name'] == plugin_name:
                         self.plugins[plugin_name] = plugin
+
+    def publish_item_response(self, string):
+        LOG.debug('Invoked publish on item %s', string)
+        self.mqtt.client.publish(
+                self.config['publish'][string]['topic'],
+                self.config['publish'][string]['payload'],
+                retain=self.config['publish'][string]['retain'])
 
     def on_right_click(self, data, event_button, event_time):
         self.menu.popup(None, None, None, event_button, event_time)
