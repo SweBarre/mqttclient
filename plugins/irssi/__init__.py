@@ -2,9 +2,6 @@ import os
 
 ICON = os.path.dirname(os.path.realpath(__file__))+'/icon.png'
 
-def init(config=None):
-    pass
-
 def prep(msg=None):
     return_dict = {}
     return_dict['runner'] = 'notify'

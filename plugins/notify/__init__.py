@@ -4,9 +4,6 @@ import pynotify
 ICON = os.path.dirname(os.path.realpath(__file__))+'/icon.png'
 pynotify.init("MQTTClient")
 
-def init(config=None):
-    pass
-
 def prep(msg=None):
     return_dict = {}
     if msg is not None:
