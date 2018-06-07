@@ -9,6 +9,7 @@ __licence__ = 'Apache License v2'
 
 
 import os
+import stat
 import sys
 import imp
 import logging
@@ -230,6 +231,13 @@ def write_config(destination_file, source_file=DEFAULT_CONFIG_FILE):
     """
     copyfile(source_file, destination_file)
 
+def check_file_permission(filename, mode):
+    file_permission = str(oct(stat.S_IMODE(os.stat(filename).st_mode)))
+    if file_permission == mode:
+        return True
+    else:
+        return False
+
 
 if __name__ == '__main__':
     #configure logging
@@ -237,6 +245,8 @@ if __name__ == '__main__':
     logging.config.dictConfig(CONFIG['logging'])
     LOG = logging.getLogger('mqttclient')
     LOG.debug('Starting')
+    if not check_file_permission(CONFIG_FILE, '0600'):
+        LOG.warning('Wrong permissions on file %s', CONFIG_FILE)
 
     APP = MQTTNotify(CONFIG)
     APP.main()
