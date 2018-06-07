@@ -156,7 +156,7 @@ class MQTTNotify():
                         self.plugins[plugin_name] = plugin
 
     def publish_item_response(self, string):
-        LOG.debug('Invoked publish on itme %s', string)
+        LOG.debug('Invoked publish on item %s', string)
         self.mqtt.client.publish(
                 self.config['publish'][string]['topic'],
                 self.config['publish'][string]['payload'],
