@@ -23,6 +23,7 @@ import paho.mqtt.client as paho_mqtt
 import yaml
 import gtk
 import gobject
+import time
 gtk.gdk.threads_init()
 
 CONFIG_FILE = os.path.expanduser("~/.mqttclient.yaml")
@@ -31,7 +32,12 @@ ICON_CONNECTED = 'images/icon_connected.png'
 ICON_DISCONNECTED = 'images/icon_disconnected.png'
 ICON_WARNING = 'images/icon_warning.png'
 ICON_ERROR = 'images/icon_error.png'
+
 DEFAULT_CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)) + '/default_mqttclient.yaml'
+
+MQTT_LOOP_TIMEOUT = 1.0
+MQTT_LOOP_MAX_PACKETS = 1
+
 def get_resource_path(rel_path):
     """ returns absolut path to file """
     dir_of_py_file = os.path.dirname(os.path.realpath(__file__))
@@ -44,6 +50,8 @@ class MQTT(threading.Thread):
     """ Thread to handle MQTT communication """
     def __init__(self, config):
         super(MQTT, self).__init__()
+        self.running = True
+        self.lost_connection = False
         self.config = config
         self.client_name = 'mqttclient_' + ''.join(
             random.choice(string.ascii_uppercase + string.digits) for _ in range(15))
@@ -64,12 +72,12 @@ class MQTT(threading.Thread):
     def on_connect(self, client, userdata, flags, rc):
         """ callback for paho mqtt client """
         if rc == 0:
+            self.lost_connection= False
             gobject.idle_add(APP.connected)
             subs = []
             for subscription in self.config['subscriptions']:
                 if subscription['subscribe']:
                     subs.append((subscription['topic'], 0))
-            print subs
             self.client.subscribe(subs)
         else:
             LOG.debug('Connection problem')
@@ -77,9 +85,11 @@ class MQTT(threading.Thread):
 
     def on_disconnect(self, client, userdata, rc=0):
         """ callback for paho mqtt client """
+        self.lost_connection = False
         if rc == 0:
             gobject.idle_add(APP.disconnected)
         else:
+            self.lost_connection = True
             LOG.warning('Lost connection with mqtt-broker: %s', str(rc))
             gobject.idle_add(APP.warning)
 
@@ -91,20 +101,35 @@ class MQTT(threading.Thread):
     def quit(self):
         """ dissconnect paho mqtt client """
         self.client.disconnect()
+        self.running = False
 
-    def run(self):
+    def connect(self):
+        self.lost_connection = False
         try:
             LOG.info('Connecting to %s:%i', self.config['host'], self.config['port'])
             self.client.connect(
                 self.config['host'],
                 self.config['port'],
                 self.config['timeout_reconnect'])
-            self.client.loop_forever()
         except Exception, error:
             LOG.error('Unable to connect to %s:%i  : %s',
                       self.config['host'], self.config['port'], str(error))
             gobject.idle_add(APP.error)
 
+    def disconnect(self):
+        self.client.disconnect()
+
+    def run(self):
+        if self.config['connect_on_launch']:
+            self.connect()
+        while self.running:
+            if self.lost_connection:
+                try:
+                    self.client.reconnect()
+                    time.sleep(5)
+                except Exception, error:
+                    time.sleep(2)
+            self.client.loop(MQTT_LOOP_TIMEOUT, MQTT_LOOP_MAX_PACKETS)
 
 class MQTTNotify():
     """ Application class """
@@ -121,17 +146,26 @@ class MQTTNotify():
         self.menu = gtk.Menu()
         self.publish_item = gtk.MenuItem("Publish")
         self.seperator_item = gtk.SeparatorMenuItem()
+        self.connect_item = gtk.MenuItem("Connect")
+        self.disconnect_item = gtk.MenuItem("Disonnect")
         self.quit_item = gtk.MenuItem("Quit")
         self.menu.append(self.publish_item)
         self.menu.append(self.seperator_item)
+        self.menu.append(self.connect_item)
+        self.menu.append(self.disconnect_item)
         self.menu.append(self.quit_item)
         self._create_publish_menu()
         #add callbacks
         self.quit_item.connect_object("activate", self.quit, "Quit")
+        self.connect_item.connect_object("activate", self.connect, "Connect")
+        self.disconnect_item.connect_object("activate", self.disconnect, "Disconnect")
 
         #Show the menu items
         self.publish_item.show()
+        self.publish_item.set_sensitive(False)
         self.seperator_item.show()
+        self.connect_item.show()
+        self.disconnect_item.hide()
         self.quit_item.show()
 
     def _create_publish_menu(self):
@@ -155,6 +189,13 @@ class MQTTNotify():
                     if plugin['name'] == plugin_name:
                         self.plugins[plugin_name] = plugin
 
+    def disconnect(self, data=None):
+        gobject.idle_add(self.mqtt.disconnect)
+
+    def connect(self, data=None):
+        gobject.idle_add(self.mqtt.connect)
+
+
     def publish_item_response(self, string):
         LOG.debug('Invoked publish on item %s', string)
         self.mqtt.client.publish(
@@ -166,15 +207,22 @@ class MQTTNotify():
         self.menu.popup(None, None, None, event_button, event_time)
 
     def disconnected(self):
+        self.publish_item.set_sensitive(False)
+        self.connect_item.show()
+        self.disconnect_item.hide()
         self.icon.set_from_file(get_resource_path(ICON_DISCONNECTED))
 
     def connected(self):
+        self.publish_item.set_sensitive(True)
+        self.connect_item.hide()
+        self.disconnect_item.show()
         self.icon.set_from_file(get_resource_path(ICON_RUNNING))
 
     def error(self):
         self.icon.set_from_file(get_resource_path(ICON_ERROR))
 
     def warning(self):
+        self.publish_item.set_sensitive(False)
         self.icon.set_from_file(get_resource_path(ICON_WARNING))
 
     def quit(self, data=None):
