@@ -14,8 +14,8 @@ mqtt:
       topic: irssi
       plugins:
         - irssi
-    - name: lights
-      subscribe: false
+    - name: test
+      subscribe: true
       topic: test
       plugins:
         - notify
