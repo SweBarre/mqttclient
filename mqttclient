@@ -304,6 +304,18 @@ def write_config(destination_file, source_file=DEFAULT_CONFIG_FILE):
     if config=None, write the default configuration
     """
     copyfile(source_file, destination_file)
+    os.chmod(destination_file, 0o600)
+    md = gtk.MessageDialog(
+            None,
+            gtk.DIALOG_DESTROY_WITH_PARENT,
+            gtk.MESSAGE_INFO,
+            gtk.BUTTONS_OK,
+            "Change your settings in ~/.mqttclient.yaml and start mqttclient again."
+            )
+    response = md.run()
+    md.destroy()
+
+
 
 def check_file_permission(filename, mode):
     file_permission = str(oct(stat.S_IMODE(os.stat(filename).st_mode)))
