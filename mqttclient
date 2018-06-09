@@ -123,8 +123,13 @@ class MQTT(threading.Thread):
         if self.config['connect_on_launch']:
             self.connect()
         while self.running:
+            if self.lost_connection:
+                try:
+                    self.client.reconnect()
+                    time.sleep(5)
+                except Exception, error:
+                    time.sleep(2)
             self.client.loop(MQTT_LOOP_TIMEOUT, MQTT_LOOP_MAX_PACKETS)
-
 
 class MQTTNotify():
     """ Application class """
