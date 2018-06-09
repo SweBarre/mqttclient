@@ -171,12 +171,11 @@ class MQTTNotify():
     def _create_publish_menu(self):
         """ create the publish menu on the right click """
         self.publish_menu = gtk.Menu()
-        for key in self.config['publish'].keys():
-            sub_menu = gtk.MenuItem(key)
+        for item in self.config['publish']:
+            sub_menu = gtk.MenuItem(item['name'])
             self.publish_menu.append(sub_menu)
-            sub_menu.connect_object("activate", self.publish_item_response, key)
+            sub_menu.connect_object("activate", self.publish_item_response, item['name'])
             sub_menu.show()
-
         self.publish_item.set_submenu(self.publish_menu)
 
 
@@ -198,10 +197,12 @@ class MQTTNotify():
 
     def publish_item_response(self, string):
         LOG.debug('Invoked publish on item %s', string)
-        self.mqtt.client.publish(
-                self.config['publish'][string]['topic'],
-                self.config['publish'][string]['payload'],
-                retain=self.config['publish'][string]['retain'])
+        for item in self.config['publish']:
+            if item['name'] == string:
+                self.mqtt.client.publish(
+                        item['topic'],
+                        item['payload'],
+                        retain=item['retain'])
 
     def on_right_click(self, data, event_button, event_time):
         self.menu.popup(None, None, None, event_button, event_time)
