@@ -154,7 +154,7 @@ class MQTTNotify():
         self.menu.append(self.connect_item)
         self.menu.append(self.disconnect_item)
         self.menu.append(self.quit_item)
-        self._create_publish_menu()
+        self._create_publish_menu(self.publish_item, self.config['publish'])
         #add callbacks
         self.quit_item.connect_object("activate", self.quit, "Quit")
         self.connect_item.connect_object("activate", self.connect, "Connect")
@@ -168,15 +168,21 @@ class MQTTNotify():
         self.disconnect_item.hide()
         self.quit_item.show()
 
-    def _create_publish_menu(self):
+    def _create_publish_menu(self, root_sub_menu_item, menu_content):
         """ create the publish menu on the right click """
-        self.publish_menu = gtk.Menu()
-        for item in self.config['publish']:
-            sub_menu = gtk.MenuItem(item['name'])
-            self.publish_menu.append(sub_menu)
-            sub_menu.connect_object("activate", self.publish_item_response, item['name'])
-            sub_menu.show()
-        self.publish_item.set_submenu(self.publish_menu)
+        sub_menu = gtk.Menu()
+        for item in menu_content:
+            if 'menu' in item:
+                sub_menu_item = gtk.MenuItem(item['name'])
+                sub_menu.append(sub_menu_item)
+                sub_menu_item.show()
+                self._create_publish_menu(sub_menu_item, item['menu'])
+            else:
+                sub_menu_item = gtk.MenuItem(item['name'])
+                sub_menu.append(sub_menu_item)
+                sub_menu_item.connect_object("activate", self.publish_item_response, item['name'])
+                sub_menu_item.show()
+        root_sub_menu_item.set_submenu(sub_menu)
 
 
     def _load_plugins(self):
@@ -194,15 +200,19 @@ class MQTTNotify():
     def connect(self, data=None):
         gobject.idle_add(self.mqtt.connect)
 
+    def _loop_publish_menu(self, item_list, string):
+        for item in item_list:
+            if 'menu' in item:
+                self._loop_publish_menu(item['menu'], string)
+            elif item['name'] == string:
+                self.mqtt.client.publish(
+                item['topic'],
+                item['payload'],
+                retain=item['retain'])
 
     def publish_item_response(self, string):
         LOG.debug('Invoked publish on item %s', string)
-        for item in self.config['publish']:
-            if item['name'] == string:
-                self.mqtt.client.publish(
-                        item['topic'],
-                        item['payload'],
-                        retain=item['retain'])
+        self._loop_publish_menu(self.config['publish'], string)
 
     def on_right_click(self, data, event_button, event_time):
         self.menu.popup(None, None, None, event_button, event_time)
