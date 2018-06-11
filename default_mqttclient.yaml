@@ -21,13 +21,19 @@ mqtt:
         - notify
 publish:
   - name: test 1
-    topic: test/testing
+    topic: test
     payload: hejsan svejsan
     retain: false
   - name: test 2
     topic: test2/testing
     payload: kalle kalas
     retain: false
+  - name: sub meny name
+    menu:
+      - name: test 3
+        topic: test
+        payload: from submenu
+        retain: false
 
 logging:
   version: 1
