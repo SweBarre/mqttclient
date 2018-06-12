@@ -30,7 +30,7 @@ mqtt:
       subscribe: true
       topic: test
       plugins:
-- notify
+        - notify
 ```
 The `connect_on_launch` specifies if mqttclient should connect to mqtt server automaticly when you launch the application or not. Under `subscription` you specify the topics you want the application to subscribe to and supports wildcards. 
 For example, `myhome/floor1/temperature/#` would subscribe to all topics under _myhome/floor1/temperature_ while `myhome/+/lights/#` would subscribe to all topics under _lights_ on all _floors_.
