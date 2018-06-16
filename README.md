@@ -36,6 +36,13 @@ The `connect_on_launch` specifies if mqttclient should connect to mqtt server au
 For example, `myhome/floor1/temperature/#` would subscribe to all topics under _myhome/floor1/temperature_ while `myhome/+/lights/#` would subscribe to all topics under _lights_ on all _floors_.
 the _plugins_ list specifies all plugins that should be executed when a topic is updated
 
+### plugin
+Here you can override the plugins default configuration, for example setting the priority on notifcation for the irssi plugin from de default pynotify.URGENCY_NORMAL to pynotify.URGENCY_CRITICAL
+```yaml
+plugin:
+  irssi:
+    urgency: critical
+```
 ### publish
 This section configures the publish menu when you right click on the application indicator
 ![right_click_menu](https://user-images.githubusercontent.com/254416/41272005-b3cb7090-6e13-11e8-8121-a49f230b82a9.png)
