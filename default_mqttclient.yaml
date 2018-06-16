@@ -19,6 +19,11 @@ mqtt:
       topic: test
       plugins:
         - notify
+
+plugin:
+  irssi:
+    urgency: critical
+
 publish:
   - name: test 1
     topic: test
