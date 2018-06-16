@@ -67,11 +67,18 @@ When the application is launched it goes through all subscriptions in the mqtt s
 One method is mandatory in the plugin and that's the **prep** method
 example for the notify plugin
 ```python
-def prep(msg=None):
+def prep(msg=None, config=None):
     return_dict = {}
+    return_dict['config'] = config
+    icon = ICON
+    if config is not None:
+        if 'icon' in config:
+            icon = config['icon']
     if msg is not None:
-        return_dict = {'title': msg.topic, 'message': msg.payload, 'icon': ICON }
-return return_dict
+        return_dict['title'] = msg.topic
+        return_dict['message'] = msg.payload
+        return_dict['icon'] = icon
+    return return_dict
 ```
 
 When a topic that the application is subscribing to is updated the mqttclient will go though the plugin list defined for that topic and call the prep method with msg as parameter.
