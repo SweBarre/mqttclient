@@ -248,7 +248,11 @@ class MQTTNotify():
                     try:
                         plugin = load_plugin(self.plugins[plugin_name])
                         LOG.debug('Preparing plugin : %s', plugin_name)
-                        args = plugin.prep(msg)
+                        cfg = None
+                        if 'plugin' in self.config:
+                            if plugin_name in self.config['plugin']:
+                                cfg = self.config['plugin'][plugin_name]
+                        args = plugin.prep(msg, cfg)
                         if 'runner' in args:
                             plugin = load_plugin(self.plugins[args['runner']])
                             plugin_name = args['runner']

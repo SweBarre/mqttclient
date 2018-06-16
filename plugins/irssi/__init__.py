@@ -1,13 +1,18 @@
-# this is a plugin to parse messages from
-# https://github.com/dm8tbr/irssi-mqtt-notify/
+"""
+this is a plugin to parse messages from mqtt that's been published with
+the irssi-mqtt-notiry plugin (https://github.com/dm8tbr/irssi-mqtt-notify/)
 
+It uses the notify plugin as runner
+
+"""
 import os
 
 ICON = os.path.dirname(os.path.realpath(__file__))+'/icon.png'
 
-def prep(msg=None):
+def prep(msg=None, config=None):
     return_dict = {}
     return_dict['runner'] = 'notify'
+    return_dict['config'] = config
     delimiter = None
     if msg is not None:
         if msg.payload[0] == "(":
