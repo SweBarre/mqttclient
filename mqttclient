@@ -166,7 +166,7 @@ class MQTTNotify():
 
         # create icon and icon menu
         self.indicator = AppIndicator3.Indicator.new(
-                APPINDICATOR_ID, os.path.abspath(ICON_DISCONNECTED),
+                APPINDICATOR_ID, get_resource_path(ICON_DISCONNECTED),
                 AppIndicator3.IndicatorCategory.SYSTEM_SERVICES
                 )
         self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
@@ -233,20 +233,20 @@ class MQTTNotify():
         self.publish_item.set_sensitive(False)
         self.connect_item.show()
         self.disconnect_item.hide()
-        self.indicator.set_icon(os.path.abspath(ICON_DISCONNECTED))
+        self.indicator.set_icon(get_resource_path(ICON_DISCONNECTED))
 
     def connected(self):
         self.publish_item.set_sensitive(True)
         self.connect_item.hide()
         self.disconnect_item.show()
-        self.indicator.set_icon(os.path.abspath(ICON_RUNNING))
+        self.indicator.set_icon(get_resource_path(ICON_RUNNING))
 
     def error(self):
-        self.indicator.set_icon(os.path.abspath(ICON_ERROR))
+        self.indicator.set_icon(get_resource_path(ICON_ERROR))
 
     def warning(self):
         self.publish_item.set_sensitive(False)
-        self.indicator.set_icon(os.path.abspath(ICON_WARNING))
+        self.indicator.set_icon(get_resource_path(ICON_WARNING))
 
     def quit(self, data=None):
         self.mqtt.quit()
