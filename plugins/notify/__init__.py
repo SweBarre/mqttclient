@@ -6,10 +6,22 @@ config:
     icon         absolute path to the icon
 """
 import os
-import pynotify
+import gi
+gi.require_version('Notify', '0.7')
+from gi.repository import Notify
+gi.require_version('GdkPixbuf', '2.0')
+from gi.repository import GdkPixbuf
 
 ICON = os.path.dirname(os.path.realpath(__file__))+'/icon.png'
-pynotify.init("MQTTClient")
+Notify.init("MQTTClient")
+
+def _mydecode(var):
+    """ returns str of var """
+    if isinstance(var, str):
+        return var
+    if isinstance(var, bytes):
+        return var.decode('utf-8')
+    return str(var)
 
 def prep(msg=None, config=None):
     return_dict = {}
@@ -27,14 +39,15 @@ def prep(msg=None, config=None):
 
 def run(**kwargs):
     priorities = {
-            'low': pynotify.URGENCY_LOW,
-            'normal': pynotify.URGENCY_NORMAL,
-            'critical': pynotify.URGENCY_CRITICAL
+            'low': Notify.Urgency.LOW,
+            'normal': Notify.Urgency.NORMAL,
+            'critical': Notify.Urgency.CRITICAL
             }
     priority = 'normal'
-    if kwargs['config'] is not None:
-        if 'urgency' in kwargs['config']:
-            priority = kwargs['config']['urgency']
-    notification = pynotify.Notification(kwargs['title'], kwargs['message'], kwargs['icon'])
+    title = _mydecode(kwargs['title'])
+    message = _mydecode(kwargs['message'])
+    icon = iconpng = GdkPixbuf.Pixbuf.new_from_file(kwargs['icon'])
+    notification = Notify.Notification.new(title, message)
+    notification.set_icon_from_pixbuf(icon)
     notification.set_urgency(priorities.get(priority))
     notification.show()
