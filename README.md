@@ -37,7 +37,7 @@ For example, `myhome/floor1/temperature/#` would subscribe to all topics under _
 the _plugins_ list specifies all plugins that should be executed when a topic is updated
 
 ### plugin
-Here you can override the plugins default configuration, for example setting the priority on notifcation for the irssi plugin from de default pynotify.URGENCY_NORMAL to pynotify.URGENCY_CRITICAL
+Here you can override the plugins default configuration, for example setting the priority on notifcation for the irssi plugin from de default Notify.Urgency.NORMAL to Notify.Urgency.CRITICAL
 ```yaml
 plugin:
   irssi:
