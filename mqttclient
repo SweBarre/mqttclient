@@ -308,16 +308,20 @@ def read_config(config_file):
     """ reads the yaml config_file and returns a dictionary """
     #check to see if config_file exists, if not offer to create it
     if not os.path.isfile(config_file):
-        md = Gtk.MessageDialog(
+        md = Gtk.Dialog(
+            "No configuration found",
+            Gtk.Window(),
             None,
-            Gtk.DIALOG_DESTROY_WITH_PARENT,
-            Gtk.MESSAGE_INFO,
-            Gtk.BUTTONS_YES_NO,
-            "No configuration file found, do you want to create a default configuration?"
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_OK, Gtk.ResponseType.OK)
             )
+        label = Gtk.Label("No configuration file found, do you want to create a default configuration?")
+        box = md.get_content_area()
+        box.add(label)
+        md.show_all()
         response = md.run()
         md.destroy()
-        if response == Gtk.RESPONSE_YES:
+        if response == Gtk.ResponseType.OK:
             write_config(config_file)
         sys.exit()
 
@@ -332,14 +336,17 @@ def write_config(destination_file, source_file=DEFAULT_CONFIG_FILE):
     """
     copyfile(source_file, destination_file)
     os.chmod(destination_file, 0o600)
-    md = Gtk.MessageDialog(
+    md = Gtk.Dialog(
+            "Configuration created",
+            Gtk.Window(),
             None,
-            Gtk.DIALOG_DESTROY_WITH_PARENT,
-            Gtk.MESSAGE_INFO,
-            Gtk.BUTTONS_OK,
-            "Change your settings in ~/.mqttclient.yaml and start mqttclient again."
+            (Gtk.STOCK_OK, Gtk.ResponseType.OK)
             )
-    response = md.run()
+    box = md.get_content_area()
+    label = Gtk.Label( "Change your settings in ~/.mqttclient.yaml and start mqttclient again.")
+    box.add(label)
+    md.show_all()
+    md.run()
     md.destroy()
 
 
