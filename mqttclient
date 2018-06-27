@@ -82,7 +82,11 @@ class MQTT(threading.Thread):
             subs = []
             for subscription in self.config['subscriptions']:
                 if subscription['subscribe']:
-                    subs.append((subscription['topic'], 0))
+                    if 'qos' in subscription:
+                        qos=subscription['qos']
+                    else:
+                        qos=0
+                    subs.append((subscription['topic'], qos))
             self.client.subscribe(subs)
         else:
             LOG.debug('Connection problem')
@@ -217,9 +221,14 @@ class MQTTNotify():
             if 'menu' in item:
                 self._loop_publish_menu(item['menu'], string)
             elif item['name'] == string:
+                if 'qos' in item:
+                    qos=item['qos']
+                else:
+                    qos=0
                 self.mqtt.client.publish(
                 item['topic'],
                 item['payload'],
+                qos=qos,
                 retain=item['retain'])
 
     def publish_item_response(self, string):
