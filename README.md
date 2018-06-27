@@ -23,6 +23,7 @@ mqtt:
   subscriptions:
     - name: irssi
       subscribe: true
+      qos: 2
       topic: irssi
       plugins:
         - irssi
@@ -50,6 +51,7 @@ This section configures the publish menu when you right click on the application
 publish:
   - name: test 1
     topic: test
+    qos: 1
     payload: hejsan svejsan
     retain: false
   - name: test 2
