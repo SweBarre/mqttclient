@@ -1,6 +1,7 @@
 ![icon_running](https://user-images.githubusercontent.com/254416/41272012-bdb5ace2-6e13-11e8-846b-4e509a6b3e48.png)
 # MQTTClient
 This is my simple client that I use to connect to my mqtt client at home to get notifications on events and publishing commands remote.
+(the typelib-1_0-AppIndicator3-0_1 package needs to be installed on openSUSE leap 15)
 
 
 ## Configuration
