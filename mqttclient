@@ -335,7 +335,7 @@ def read_config(config_file):
         sys.exit()
 
     with open(config_file, "r") as yaml_file:
-        config = yaml.load(yaml_file)
+        config = yaml.load(yaml_file,  Loader=yaml.FullLoader)
     return config
 
 def write_config(destination_file, source_file=DEFAULT_CONFIG_FILE):
